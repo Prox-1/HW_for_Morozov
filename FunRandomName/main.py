@@ -1,0 +1,108 @@
+import random
+
+
+class FunRandomName:
+    __funny_adjectives = {
+        "Чудесный": 0,
+        "Неприличный": 0,
+        "Бесполезный": 0,
+        "Забавный": 0,
+        "Облачный": 0,
+        "Смешной": 0,
+        "Безумный": 0,
+        "Вкусный": 0,
+        "Мягкий": 0,
+        "Пухлый": 0,
+        "Дразнящий": 0,
+        "Шумный": 0,
+        "Фантастический": 0,
+        "Игривый": 0,
+        "Поджареный": 0,
+        "Пурпурный": 0,
+        "Прыгучий": 0,
+        "Радужный": 0,
+        "Сверкающий": 0,
+        "Кривой": 0,
+    }
+    __names = {
+        "слон": 0,
+        "тигр": 0,
+        "медведь": 0,
+        "бобр": 0,
+        "жираф": 0,
+        "крокодил": 0,
+        "обезьяна": 0,
+        "единорог": 0,
+        "кит": 0,
+        "дельфин": 0,
+        "волк": 0,
+        "лис": 0,
+        "голубь": 0,
+        "муравей": 0,
+        "кот": 0,
+        "хорек": 0,
+        "змей": 0,
+        "ленивец": 0,
+        "африканский сервал": 0,
+        "кенгуру": 0,
+    }
+
+    # Назначение отката на использованые значения прилагательных и имен
+    def __rollback(self, adj, name):
+        FunRandomName.__funny_adjectives[adj] = 12
+        FunRandomName.__names[name] = 12
+
+    # Уменьшение отката при создании нового имени
+    def __rollback_reductions(self, dict_: dict):
+        def rollback_reduction(value):
+            return value - 1 if value != 0 else value
+
+        reduced_dict = dict(
+            map(lambda item: (item[0], rollback_reduction(item[1])), dict_.items())
+        )
+        return reduced_dict
+
+    # Функция которую вставим в filter() для отбрасывания значений у которых есть откат
+    def __filter_func(self, x):
+        if x in list(FunRandomName.__funny_adjectives.keys()):  # костыль
+            dict_ = FunRandomName.__funny_adjectives
+        else:
+            dict_ = FunRandomName.__names
+
+        if dict_[x] == 0:
+            return True
+        else:
+            False
+
+    # Создание списка значений
+    def __create_lists_of_available_values(self):
+        available_list_adjs = filter(
+            self.__filter_func, FunRandomName.__funny_adjectives
+        )
+        available_list_names = filter(self.__filter_func, FunRandomName.__names)
+        return list(available_list_adjs), list(available_list_names)
+
+    # Получение элемента из прилагательных
+    def __get_elem_adj(self, list_: list, n: int):
+        FunRandomName.__funny_adjectives = self.__rollback_reductions(
+            FunRandomName.__funny_adjectives
+        )
+        return list_[n]
+
+    # Получение элемента из имен
+    def __get_elem_name(self, list_: list, n: int):
+        FunRandomName.__names = self.__rollback_reductions(FunRandomName.__names)
+        return list_[n]
+
+    def create_funny_name(self):
+        available_list_adjs, available_list_names = (
+            self.__create_lists_of_available_values()
+        )
+        l_names = len(available_list_names)
+        l_adjs = len(available_list_adjs)
+        n_of_random_name = random.randint(0, l_names - 1)
+        n_of_random_adj = random.randint(0, l_adjs - 1)
+        adj = self.__get_elem_adj(available_list_adjs, n_of_random_adj)
+        name = self.__get_elem_name(available_list_names, n_of_random_name)
+        self.__rollback(adj, name)
+        return f"{adj} {name}"
